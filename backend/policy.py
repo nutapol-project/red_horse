@@ -9,7 +9,7 @@ from schemas import PolicyAction
 
 # ─── Threshold Constants (tunable via config/env in production) ────────────────
 THRESHOLD_HIGH   = 0.80   # → BLOCK
-THRESHOLD_MEDIUM = 0.50   # → LIMIT + Extra MFA
+THRESHOLD_MEDIUM = 0.40   # → LIMIT + Extra MFA
 
 
 def enforce_fraud_policy(risk_score: float) -> PolicyAction:

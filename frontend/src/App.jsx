@@ -712,8 +712,8 @@ export default function Dashboard() {
               <div className="space-y-2">
                 {[
                   { range:"P ≥ 0.80",        action:"BLOCK + Physical KYC",    border:"border-red-700",    bg:"bg-red-950",    text:"text-red-300",    active: Math.min(rawFinal,1) >= 0.80 },
-                  { range:"0.50 ≤ P < 0.80", action:"LIMIT ฿5,000 + Face MFA", border:"border-yellow-700", bg:"bg-yellow-950", text:"text-yellow-300", active: Math.min(rawFinal,1) >= 0.50 && Math.min(rawFinal,1) < 0.80 },
-                  { range:"P < 0.50",        action:"ALLOW — Normal Profile",   border:"border-green-700",  bg:"bg-green-950",  text:"text-green-300",  active: Math.min(rawFinal,1) < 0.50 },
+                  { range:"0.40 ≤ P < 0.80", action:"LIMIT ฿5,000 + Face MFA", border:"border-yellow-700", bg:"bg-yellow-950", text:"text-yellow-300", active: Math.min(rawFinal,1) >= 0.40 && Math.min(rawFinal,1) < 0.80 },
+                  { range:"P < 0.40",        action:"ALLOW — Normal Profile",   border:"border-green-700",  bg:"bg-green-950",  text:"text-green-300",  active: Math.min(rawFinal,1) < 0.40 },
                 ].map(({ range, action, border, bg, text, active }) => (
                   <div key={range}
                     className={`flex justify-between items-center rounded-lg border px-3 py-2 transition-all
