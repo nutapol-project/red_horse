@@ -408,7 +408,23 @@ Then deploy to [Railway](https://railway.app) or [Render](https://render.com) by
 ## 📄 License
 
 This project is developed for academic and research purposes.
+## 🤖 AI Tool Usage
 
+This project was developed with assistance from **Claude (Anthropic)**
+via [ai.kmitl.ac.th](https://ai.kmitl.ac.th) (kAI platform by KMITL).
+
+---
+
+| Component | AI Contribution |
+|-----------|----------------|
+| Backend Engines | Statistical formulas, Bayesian logic, GNN graph code |
+| FastAPI Endpoints | API structure, middleware, error handling |
+| React Dashboard | All 8 tabs, charts, SVG visualizations |
+| AssessForm | Form components, preset templates, fetch client |
+| Documentation | README, Project Description, AI_USAGE.md |
+
+> Co-authored-by: Claude (Anthropic) `claude@anthropic.com`
+> AI-Tool: Claude 3.5 Sonnet via ai.kmitl.ac.th
 ---
 
 *🐴 Red Horse Project · Predictive Anti-Fraud & Network Surveillance System · v1.0.0*
