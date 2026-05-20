@@ -15,6 +15,7 @@ import hashlib
 
 from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 
 from schemas import (
     IngestionPayload,
@@ -44,6 +45,23 @@ app = FastAPI(
     version     = "1.0.0",
 )
 
+# ══════════════════════════════════════════════════════════════════════════════
+# CORS — อนุญาต Frontend เรียก API ได้
+# ══════════════════════════════════════════════════════════════════════════════
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",    # Vite dev server
+        "http://localhost:4173",    # Vite preview
+        "http://127.0.0.1:5173",
+        "https://*.vercel.app",     # Vercel deploy
+        "*",                        # ← เปิดกว้างไว้ก่อนสำหรับ dev
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 # ══════════════════════════════════════════════════════════════════════════════
 # MIDDLEWARE — Request timing
@@ -54,6 +72,7 @@ async def add_process_time_header(request: Request, call_next):
     response = await call_next(request)
     elapsed = round((time.perf_counter() - start) * 1000, 2)
     response.headers["X-Process-Time-Ms"] = str(elapsed)
+    response.headers["X-Powered-By"]      = "RedHorse/1.0.0"
     logger.info(f"{request.method} {request.url.path} → {response.status_code} [{elapsed}ms]")
     return response
 
@@ -97,7 +116,7 @@ async def assess_account(payload: IngestionPayload) -> FraudAssessmentResponse:
         # Simulate Benford inputs from "first-mile configuration values"
         # In production these come from a transaction/config event stream
         mock_first_mile_inputs = [
-            50_000.0,   # likely: set max daily limit
+            50_000.0,
             bio.typing_speed_wpm * 100,
             float(bio.balance_checks_without_funds + 1) * 10_000,
         ]
@@ -122,7 +141,6 @@ async def assess_account(payload: IngestionPayload) -> FraudAssessmentResponse:
         )
 
         # ── SCORE FUSION ───────────────────────────────────────────────────
-        # Additive penalties for hard binary signals
         sim_penalty        = 0.10 if not foot.sim_serial_owner_match else 0.0
         copy_paste_penalty = 0.08 if bio.copy_paste_detected          else 0.0
 
@@ -162,11 +180,11 @@ async def assess_account(payload: IngestionPayload) -> FraudAssessmentResponse:
                 cluster_flagged     = engine_b_output.cluster_flagged,
             ),
             risk_breakdown = RiskScoreBreakdown(
-                engine_a_score      = engine_a_output.normalized_score,
-                engine_b_score      = engine_b_output.normalized_score,
-                sim_mismatch_penalty= sim_penalty,
-                copy_paste_penalty  = copy_paste_penalty,
-                final_score         = final_score,
+                engine_a_score       = engine_a_output.normalized_score,
+                engine_b_score       = engine_b_output.normalized_score,
+                sim_mismatch_penalty = sim_penalty,
+                copy_paste_penalty   = copy_paste_penalty,
+                final_score          = final_score,
             ),
             policy = policy_action,
         )
@@ -204,7 +222,7 @@ async def run_simulation(n_accounts: int = 200, fraud_rate: float = 0.10):
         "total_accounts"  : n_accounts,
         "fraud_rate_input": fraud_rate,
         "avg_score_legit" : round(float(df[~df.is_fraud_label]["final_score"].mean()), 4),
-        "avg_score_fraud" : round(float(df[df.is_fraud_label]["final_score"].mean()), 4),
+        "avg_score_fraud" : round(float(df[df.is_fraud_label]["final_score"].mean()),  4),
         "policy_breakdown": summary.reset_index().rename(
             columns={0: "count"}
         ).to_dict(orient="records"),
@@ -216,7 +234,12 @@ async def run_simulation(n_accounts: int = 200, fraud_rate: float = 0.10):
 # ══════════════════════════════════════════════════════════════════════════════
 @app.get("/v1/health", tags=["System"])
 async def health_check():
-    return {"status": "ok", "service": "red_horse", "version": "1.0.0"}
+    return {
+        "status" : "ok",
+        "service": "red_horse",
+        "version": "1.0.0",
+        "cors"   : "enabled",
+    }
 
 
 # ── Dev server entry point ─────────────────────────────────────────────────────
